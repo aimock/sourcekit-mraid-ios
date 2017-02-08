@@ -18,6 +18,7 @@
 #import "MRAIDSettings.h"
 #import "UIButton+SKExtension.h"
 #import "NSURL+SecuredURL.h"
+#import "UIView+Spinner.h"
 
 #import "mraidjs.h"
 #import "CloseButton.h"
@@ -46,6 +47,7 @@ typedef enum {
 @property (nonatomic, assign) MRAIDState state;
     // This corresponds to the MRAID placement type.
 @property (nonatomic, assign) BOOL isInterstitial;
+@property (nonatomic, assign) BOOL willBeShown;
     
     // The only property of the MRAID expandProperties we need to keep track of
     // on the native side is the useCustomClose property.
@@ -164,15 +166,19 @@ typedef enum {
     }] resume];
 }
 
+- (void)loadAdHTMLAndWillBeShown:(NSString *)html{
+    self.willBeShown = YES;
+    [self loadAdHTML:html];
+}
+
 - (void)loadAdHTML:(NSString *)html {
     if (!html) {
-        if ([self.delegate respondsToSelector:@selector(mraidView:failToLoadAdThrowError:)]) {
-            NSDictionary *userInfo = @{
-                                       NSLocalizedDescriptionKey: NSLocalizedString(@"Operation was unsuccessful.", nil),
-                                       NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"HTML cannot be nil", nil)};
-            NSError * error = [NSError errorWithDomain:kSKMRAIDErrorDomain code:MRAIDValidationError userInfo:userInfo];
-            [self.delegate mraidView:self failToLoadAdThrowError:error];
-        }
+        NSDictionary *userInfo = @{
+                                   NSLocalizedDescriptionKey: NSLocalizedString(@"Operation was unsuccessful.", nil),
+                                   NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"HTML cannot be nil", nil)};
+        NSError * error = [NSError errorWithDomain:kSKMRAIDErrorDomain code:MRAIDValidationError userInfo:userInfo];
+        
+        [self failToLoadOrPresentation:error];
         return;
     }
     
@@ -197,12 +203,11 @@ typedef enum {
     html = [SKMRAIDUtil processRawHtml:html];
     if (html) {
         self.state = MRAIDStateLoading;
+        [self showSpinner];
         [self.currentWebView loadHTMLString:html baseURL:self.baseURL];
     } else {
-        if ([self.delegate respondsToSelector:@selector(mraidView:failToLoadAdThrowError:)]) {
-            NSError * error = [NSError errorWithDomain:kSKMRAIDErrorDomain code:MRAIDValidationError userInfo:nil];
-            [self.delegate mraidView:self failToLoadAdThrowError:error];
-        }
+        NSError * error = [NSError errorWithDomain:kSKMRAIDErrorDomain code:MRAIDValidationError userInfo:nil];
+        [self failToLoadOrPresentation:error];
     }
 }
 
@@ -215,6 +220,17 @@ typedef enum {
 
 
 #pragma mark - Private
+
+- (void)failToLoadOrPresentation:(NSError *)error{
+    if (self.willBeShown && [self.delegate respondsToSelector:@selector(mraidView:failToPresentAdThrowError:)]) {
+        [self.delegate mraidView:self failToPresentAdThrowError:error];
+        return;
+    }
+    
+    if ([self.delegate respondsToSelector:@selector(mraidView:failToLoadAdThrowError:)]) {
+        [self.delegate mraidView:self failToLoadAdThrowError:error];
+    }
+}
 
 // designated initializer
 - (id)initWithFrame:(CGRect)frame
@@ -472,7 +488,10 @@ typedef enum {
     }
     
     // The only time it is valid to call expand is when the ad is currently in either default or resized state.
-    if (self.state != MRAIDStateDefault && self.state != MRAIDStateResized) {
+    
+    BOOL isLoadedAlready = self.state != MRAIDStateDefault && self.state != MRAIDStateResized && !self.willBeShown;
+    BOOL isFailedLoadButCanBeShow = self.state == MRAIDStateDefault && self.willBeShown;
+    if (isLoadedAlready || isFailedLoadButCanBeShow) {
         // do nothing
         return;
     }
@@ -485,7 +504,7 @@ typedef enum {
     if (!urlString) {
         // 1-part expansion
         self.webView.frame = frame;
-        [self.webView removeFromSuperview];
+//        [self.webView removeFromSuperview];
     } else {
         // 2-part expansion
         self.webViewPart2 = [self defaultWebViewWithFrame:frame];
@@ -525,7 +544,7 @@ typedef enum {
         [self.delegate mraidViewWillExpand:self];
     }
     
-    [self.modalVC.view addSubview:self.currentWebView];
+    self.modalVC.view = self;
     
     if (SK_SUPPRESS_BANNER_AUTO_REDIRECT) {
         [self.modalVC setTapObserver];
@@ -932,6 +951,7 @@ typedef enum {
 
 - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
     [self disableJsCallbackInWebViewIfNeeded:webView];
+    [self hideSpinner];
     
     if (self.state == MRAIDStateLoading) {
         self.state = MRAIDStateDefault;
@@ -959,10 +979,9 @@ typedef enum {
 }
 
 - (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error {
-    if ([self.delegate respondsToSelector:@selector(mraidView:failToLoadAdThrowError:)]) {
-        NSError * mraidError = [NSError errorWithDomain:kSKMRAIDErrorDomain code:MRAIDShowError userInfo:error.userInfo];
-        [self.delegate mraidView:self failToLoadAdThrowError:mraidError];
-    }
+    [self hideSpinner];
+    NSError * mraidError = [NSError errorWithDomain:kSKMRAIDErrorDomain code:MRAIDShowError userInfo:error.userInfo];
+    [self failToLoadOrPresentation:mraidError];
 }
 
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {

@@ -69,9 +69,10 @@
                                                             customScripts:nil
                                                        rootViewController:self];
     
-//    NSURL * url = [NSURL URLWithString:@"http://iab.net/ad.html"];
+    NSURL * url = [NSURL URLWithString:@"http://iab.net/ad.html"];
+//    [interstitial preloadAdFromURL:url];
     [interstitial loadAdHTML:htmlData];
-                    
+    
 }
 
 - (IBAction)displayInterstitial:(id)sender
@@ -84,6 +85,7 @@
 
 - (void)mraidInterstitial:(SKMRAIDInterstitial *)mraidInterstitial preloadedAd:(NSString *)preloadedAd {
     [interstitial loadAdHTML:preloadedAd];
+//    [interstitial loadAdHTMLAndWillBeShown:preloadedAd];
     
 }
 
@@ -97,6 +99,10 @@
     [self.statusLabel setText:@"Status: Ready"];
     self.fetchInterButton.enabled = NO;
     self.displayInterButton.enabled = YES;
+}
+
+- (void)mraidInterstitial:(SKMRAIDInterstitial *)mraidInterstitial didFailToPresent:(NSError *)presentationError{
+    
 }
 
 - (void)mraidInterstitialAdFailed:(SKMRAIDInterstitial *)mraidInterstitial 

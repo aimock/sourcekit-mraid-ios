@@ -69,6 +69,11 @@
     [self.mraidView loadAdHTML:html];
 }
 
+- (void)loadAdHTMLAndWillBeShown:(NSString *)html{
+    [self.mraidView loadAdHTMLAndWillBeShown:html];
+    [self.mraidView showAsInterstitial];
+}
+
 - (void)cancel {
     [self.mraidView cancel];
 }
@@ -108,12 +113,23 @@
     }
 }
 
-- (void)mraidViewAdFailed:(SKMRAIDView *)mraidView
+- (void)mraidView:(SKMRAIDView *)mraidView failToLoadAdThrowError:(NSError *)error
 {
     self.isReady = YES;
     if ([self.delegate respondsToSelector:@selector(mraidInterstitialAdFailed:)]) {
         [self.delegate mraidInterstitialAdFailed:self];
     }
+}
+
+- (void)mraidView:(SKMRAIDView *)mraidView failToPresentAdThrowError:(NSError *)error{
+    if ([self.delegate respondsToSelector:@selector(mraidInterstitial:didFailToPresent:)]) {
+        [self.delegate mraidInterstitial:self didFailToPresent:error];
+    }
+    self.mraidView.isViewable = NO;
+    self.mraidView.delegate = nil;
+    self.mraidView.rootViewController = nil;
+    self.mraidView = nil;
+    self.isReady = NO;
 }
 
 - (void)mraidViewWillExpand:(SKMRAIDView *)mraidView

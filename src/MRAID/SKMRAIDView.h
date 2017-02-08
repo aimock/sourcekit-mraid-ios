@@ -34,6 +34,8 @@ typedef enum {
 
 - (void)mraidView:(SKMRAIDView *)mraidView failToLoadAdThrowError:(NSError *)error;
 
+- (void)mraidView:(SKMRAIDView *)mraidView failToPresentAdThrowError:(NSError *)error;
+
 - (void)mraidViewWillExpand:(SKMRAIDView *)mraidView;
 
 - (void)mraidViewDidClose:(SKMRAIDView *)mraidView;
@@ -68,6 +70,8 @@ typedef enum {
 - (void)preloadAdFromURL:(NSURL *)url;
 
 - (void)loadAdHTML:(NSString *)html;
+
+- (void)loadAdHTMLAndWillBeShown:(NSString *)html;
 
 - (void)cancel;
 

@@ -19,6 +19,7 @@
 
 - (void)mraidInterstitial:(SKMRAIDInterstitial *)mraidInterstitial preloadedAd:(NSString *)preloadedAd;
 - (void)mraidInterstitial:(SKMRAIDInterstitial *)mraidInterstitial didFailToPreloadAd:(NSError *)preloadError;
+- (void)mraidInterstitial:(SKMRAIDInterstitial *)mraidInterstitial didFailToPresent:(NSError *)presentationError;
 - (void)mraidInterstitialAdReady:(SKMRAIDInterstitial *)mraidInterstitial;
 - (void)mraidInterstitialAdFailed:(SKMRAIDInterstitial *)mraidInterstitial;
 - (void)mraidInterstitialWillShow:(SKMRAIDInterstitial *)mraidInterstitial;
@@ -47,6 +48,8 @@
 - (void)preloadAdFromURL:(NSURL *)url;
 
 - (void)loadAdHTML:(NSString *)html;
+
+- (void)loadAdHTMLAndWillBeShown:(NSString *)html;
 
 - (void)cancel;
 

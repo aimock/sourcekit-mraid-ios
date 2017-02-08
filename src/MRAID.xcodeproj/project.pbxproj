@@ -46,6 +46,7 @@
 		27EBFE7517F2837900FCB7DD /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27EBFE7417F2837900FCB7DD /* UIKit.framework */; };
 		9C7D4FBB1D9276F0003FE6E2 /* UIButton+SKExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C7D4FBA1D9276F0003FE6E2 /* UIButton+SKExtension.m */; };
 		B953BC071DD0CAF600CB6422 /* NSURL+SecuredURL.m in Sources */ = {isa = PBXBuildFile; fileRef = B953BC061DD0CAF600CB6422 /* NSURL+SecuredURL.m */; };
+		B998BF281E4317510087B0A6 /* UIView+Spinner.m in Sources */ = {isa = PBXBuildFile; fileRef = B998BF271E4317510087B0A6 /* UIView+Spinner.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -111,6 +112,8 @@
 		9C7D4FBA1D9276F0003FE6E2 /* UIButton+SKExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIButton+SKExtension.m"; sourceTree = "<group>"; };
 		B953BC051DD0CAF600CB6422 /* NSURL+SecuredURL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURL+SecuredURL.h"; sourceTree = "<group>"; };
 		B953BC061DD0CAF600CB6422 /* NSURL+SecuredURL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+SecuredURL.m"; sourceTree = "<group>"; };
+		B998BF261E4317510087B0A6 /* UIView+Spinner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+Spinner.h"; sourceTree = "<group>"; };
+		B998BF271E4317510087B0A6 /* UIView+Spinner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+Spinner.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -161,6 +164,8 @@
 				9C7D4FBA1D9276F0003FE6E2 /* UIButton+SKExtension.m */,
 				B953BC051DD0CAF600CB6422 /* NSURL+SecuredURL.h */,
 				B953BC061DD0CAF600CB6422 /* NSURL+SecuredURL.m */,
+				B998BF261E4317510087B0A6 /* UIView+Spinner.h */,
+				B998BF271E4317510087B0A6 /* UIView+Spinner.m */,
 			);
 			path = MRAID;
 			sourceTree = "<group>";
@@ -323,6 +328,7 @@
 				2738BDF719815D9100A968BF /* SKMRAIDUtil.m in Sources */,
 				2738BDED19815D9100A968BF /* SKMRAIDOrientationProperties.m in Sources */,
 				2738BDF519815D9100A968BF /* SKMRAIDParser.m in Sources */,
+				B998BF281E4317510087B0A6 /* UIView+Spinner.m in Sources */,
 				2738BDEB19815D9100A968BF /* MRAIDSettings.m in Sources */,
 				2738BDEF19815D9100A968BF /* SKMRAIDResizeProperties.m in Sources */,
 				2738BDF919815D9100A968BF /* SKMRAIDView.m in Sources */,
