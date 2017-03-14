@@ -10,6 +10,7 @@
 #import "MRAIDSettings.h"
 #import "SKMRAIDUtil.h"
 #import "SKMRAIDOrientationProperties.h"
+#import <WebKit/WebKit.h>
 
 typedef void (^tapBlock)();
 
@@ -24,10 +25,19 @@ typedef void (^tapBlock)();
 }
 
 @property (nonatomic, strong) UITapGestureRecognizer * tapGestureRecognizer;
+@property (nonatomic, strong) UIImageView * view;
 
 @end
 
 @implementation SKMRAIDModalViewController
+
+@dynamic view;
+
+- (void)loadView {
+    self.view = [[UIImageView alloc] initWithFrame:UIScreen.mainScreen.applicationFrame];
+    self.view.contentMode = UIViewContentModeScaleToFill;
+    self.view.backgroundColor = [UIColor blackColor];
+}
 
 - (id)init
 {
@@ -66,11 +76,52 @@ typedef void (^tapBlock)();
     return self;
 }
 
+- (void)updateBackground {
+    __block UIView * searchableView;
+    [self.view.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull view, NSUInteger idx, BOOL * _Nonnull stop) {
+        if ([view isKindOfClass:[WKWebView class]]) {
+            searchableView = view;
+            *stop = YES;
+        }
+    }];
+    if (!searchableView) {
+        return;
+    }
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        UIGraphicsBeginImageContext(CGSizeMake(CGRectGetWidth(searchableView.bounds),CGRectGetHeight(searchableView.bounds)));
+        CGContextRef context = UIGraphicsGetCurrentContext();
+        [searchableView.layer renderInContext:context];
+        UIImage *viewImage = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+        
+        CIContext *ciContext = [CIContext contextWithOptions:nil];
+        CIImage *inputImage = [CIImage imageWithCGImage:viewImage.CGImage];
+        CIFilter *filter = [CIFilter filterWithName:@"CIGaussianBlur"];
+        [filter setValue:inputImage forKey:kCIInputImageKey];
+        [filter setValue:[NSNumber numberWithFloat:5.0f] forKey:@"inputRadius"];
+        CIImage *result = [filter valueForKey:kCIOutputImageKey];
+        
+        CGImageRef cgImage = [ciContext createCGImage:result fromRect:[inputImage extent]];
+        UIImage * resultImage = [UIImage imageWithCGImage:cgImage];
+        CFRelease(cgImage);
+
+        __weak typeof(self) weakSelf = self;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [UIView transitionWithView:weakSelf.view
+                              duration:0.2f
+                               options:UIViewAnimationOptionCurveEaseIn
+                            animations:^{
+                                weakSelf.view.image = resultImage;
+                            }
+                            completion:nil];
+        });
+    });
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    self.view.backgroundColor = [UIColor blackColor];
-	// Do any additional setup after loading the view.
 }
 
 - (void)didReceiveMemoryWarning
@@ -116,7 +167,7 @@ typedef void (^tapBlock)();
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-
+    
     isStatusBarHidden = [[UIApplication sharedApplication] isStatusBarHidden];
     if (SYSTEM_VERSION_LESS_THAN(@"7.0")) {
         [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationFade];
@@ -127,6 +178,7 @@ typedef void (^tapBlock)();
 {
     [super viewDidAppear:animated];
     
+    [self updateBackground];
     hasViewAppeared = YES;
     
     if (hasRotated) {

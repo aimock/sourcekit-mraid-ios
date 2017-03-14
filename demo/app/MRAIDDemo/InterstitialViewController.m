@@ -69,9 +69,11 @@
                                                             customScripts:nil
                                                        rootViewController:self];
     
-//    NSURL * url = [NSURL URLWithString:@"http://iab.net/ad.html"];
-    [interstitial loadAdHTML:htmlData]; //estimatedAdSize:CGSizeMake(300, 250)];
-                    
+    NSURL * url = [NSURL URLWithString:@"https://s3-eu-west-1.amazonaws.com/uploads-eu.hipchat.com/35497/2440054/R7MjU3qJQeQBrN0/sample_mraid.html"];
+
+    [interstitial preloadAdFromURL:url];
+//    [interstitial loadAdHTML:htmlData estimatedAdSize:CGSizeMake(300, 250)];
+    
 }
 
 - (IBAction)displayInterstitial:(id)sender
@@ -83,7 +85,7 @@
 #pragma mark - MRAIDInterstitialDelegate
 
 - (void)mraidInterstitial:(SKMRAIDInterstitial *)mraidInterstitial preloadedAd:(NSString *)preloadedAd {
-    [interstitial loadAdHTML:preloadedAd];
+    [interstitial loadAdHTML:preloadedAd estimatedAdSize:CGSizeMake(300, 250)];
     
 }
 
