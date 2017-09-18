@@ -188,6 +188,11 @@
     }
 }
 
+- (BOOL)prerenderingAllowedInMraidView:(SKMRAIDView *)mraidView {
+    return ([self.delegate respondsToSelector:@selector(prerenderingAllowedInInterstitial:)] && [self.delegate prerenderingAllowedInInterstitial:self]) ||
+            ![self.delegate respondsToSelector:@selector(prerenderingAllowedInInterstitial:)];
+}
+
 - (void)mraidView:(SKMRAIDView *)mraidView intersectJsLogMessage:(NSString *)logMessage {
     if ([self.delegate respondsToSelector:@selector(mraidInterstitial:intersectJsLogMessage:)]) {
         [self.delegate mraidInterstitial:self intersectJsLogMessage:logMessage];

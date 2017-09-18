@@ -18,20 +18,21 @@
 #import "MRAIDSettings.h"
 #import "UIButton+SKExtension.h"
 #import "UIView+SKExtension.h"
-
+#import "NSError+SKExtension.h"
+#import "SKMRAIDNetworkClient.h"
+#import "SKSpinnerView.h"
 #import "mraidjs.h"
 #import "CloseButton.h"
 
-#define kCloseEventRegionSize 20
-#define kCloseEventRegionInset -30
-#define kStatusBarOffset 25
-#define kMinHTMLResponseLength 70
-#define SYSTEM_VERSION_LESS_THAN(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
 
-#define kScriptObserverName @"observe"
-#define kLogHandlerName @"logHandler"
+#define kCloseEventRegionSize       20
+#define kCloseEventRegionInset      -30
+#define kStatusBarOffset            25
+#define kMinHTMLResponseLength      70
 
-NSString *const kSKMRAIDErrorDomain = @"com.skmraid.error";
+
+
+
 
 typedef enum {
     MRAIDStateLoading,
@@ -41,7 +42,8 @@ typedef enum {
     MRAIDStateHidden
 } MRAIDState;
 
-@interface SKMRAIDView () <WKNavigationDelegate, WKScriptMessageHandler, SKMRAIDModalViewControllerDelegate, UIGestureRecognizerDelegate, WKUIDelegate>
+
+@interface SKMRAIDView () <WKNavigationDelegate, WKScriptMessageHandler, SKMRAIDModalViewControllerDelegate, SKMRAIDNetworkClientDelegate, UIGestureRecognizerDelegate, WKUIDelegate>
 
 @property (nonatomic, assign) MRAIDState state;
     // This corresponds to the MRAID placement type.
@@ -51,13 +53,16 @@ typedef enum {
     // on the native side is the useCustomClose property.
     // The width, height, and isModal properties are not used in MRAID v2.0.
 
+@property (nonatomic, strong) SKMRAIDNetworkClient * networkClient;
 @property (nonatomic, strong) SKMRAIDOrientationProperties *skOrientationProperties;
 @property (nonatomic, strong) SKMRAIDResizeProperties *resizeProperties;
+@property (nonatomic, strong) SKSpinnerView * spinnerView;
     
 @property (nonatomic, strong) SKMRAIDParser *mraidParser;
 @property (nonatomic, strong) SKMRAIDModalViewController *modalVC;
     
 @property (nonatomic, strong) NSString *mraidjs;
+@property (nonatomic, strong) NSString * html;
     
 @property (nonatomic, strong) NSArray *mraidFeatures;
 @property (nonatomic, strong) NSArray *supportedFeatures;
@@ -79,6 +84,8 @@ typedef enum {
 
 @property (nonatomic, strong) UITapGestureRecognizer *tapGestureRecognizer;
 @property (nonatomic, assign) BOOL bonafideTapObserved;
+@property (nonatomic, readonly, assign) BOOL prerenderingAllowed;
+
 
 @end
 
@@ -95,16 +102,14 @@ typedef enum {
     return nil;
 }
 
-- (id)initWithFrame:(CGRect)frame
-{
+- (id)initWithFrame:(CGRect)frame {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:@"-initWithFrame is not a valid initializer for the class MRAIDView"
                                  userInfo:nil];
     return nil;
 }
 
-- (id)initWithCoder:(NSCoder *)aDecoder
-{
+- (id)initWithCoder:(NSCoder *)aDecoder {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:@"-initWithCoder is not a valid initializer for the class MRAIDView"
                                  userInfo:nil];
@@ -118,6 +123,7 @@ typedef enum {
                      delegate:(id<SKMRAIDViewDelegate>)delegate
               serviceDelegate:(id<SKMRAIDServiceDelegate>)serviceDelegate
            rootViewController:(UIViewController *)rootViewController {
+    
     return [self initWithFrame:frame
              supportedFeatures:features
                       delegate:delegate
@@ -133,6 +139,7 @@ typedef enum {
               serviceDelegate:(id<SKMRAIDServiceDelegate>)serviceDelegate
                 customScripts:(NSArray *)customScripts
            rootViewController:(UIViewController *)rootViewController {
+    
     return [self initWithFrame:frame
                 asInterstitial:NO
              supportedFeatures:features
@@ -142,59 +149,44 @@ typedef enum {
             rootViewController:rootViewController];
 }
 
-- (void)preloadAdFromURL:(NSURL *)url {
-    __weak typeof(self) weakSelf = self;
-    
-    [[[NSURLSession sharedSession] dataTaskWithURL:url completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-        NSInteger code = [response isKindOfClass:[NSHTTPURLResponse class]] ? [(NSHTTPURLResponse *)response statusCode] : 500;
-        if (error || !data || code >= 400) {
-            NSError * mraidError = [NSError errorWithDomain:kSKMRAIDErrorDomain code:MRAIDPreloadNetworkError userInfo:error.userInfo];
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if ([weakSelf.delegate respondsToSelector:@selector(mraidView:didFailToPreloadAd:)]) {
-                    [weakSelf.delegate mraidView:weakSelf didFailToPreloadAd:mraidError];
-                }
-            });
-            return;
-        }
-        
-        NSString * downloadedData = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-        if ([downloadedData length] < kMinHTMLResponseLength) {
-            NSError * mraidError = [NSError errorWithDomain:kSKMRAIDErrorDomain code:MRAIDPreloadNoFillError userInfo:nil];
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if ([weakSelf.delegate respondsToSelector:@selector(mraidView:didFailToPreloadAd:)]) {
-                    [weakSelf.delegate mraidView:weakSelf didFailToPreloadAd:mraidError];
-                }
-            });
-            return;
-        }
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if ([weakSelf.delegate respondsToSelector:@selector(mraidView:preloadedAd:)]) {
-                [weakSelf.delegate mraidView:weakSelf preloadedAd:downloadedData];
-            }
-        });
-        
-    }] resume];
-}
 
-- (void)loadAdHTML:(NSString *)html estimatedAdSize:(CGSize)estimatedAdSize {
+
+- (void)loadAdHTML:(NSString *)html
+   estimatedAdSize:(CGSize)estimatedAdSize {
+    
     self.estimatedAdSize = estimatedAdSize;
     [self loadAdHTML:html];
 }
 
+- (void)preloadAdFromURL:(NSURL *)url {
+    self.networkClient = [SKMRAIDNetworkClient new];
+    self.networkClient.delegate = self;
+    [self.networkClient loadDataFromURL:url];
+}
+
 - (void)loadAdHTML:(NSString *)html {
-    if (!html) {
+    self.html = [SKMRAIDUtil processRawHtml:html];
+    if (!self.html) {
         if ([self.delegate respondsToSelector:@selector(mraidView:failToLoadAdThrowError:)]) {
-            NSDictionary *userInfo = @{
-                                       NSLocalizedDescriptionKey: NSLocalizedString(@"Operation was unsuccessful.", nil),
-                                       NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"HTML cannot be nil", nil)};
-            NSError * error = [NSError errorWithDomain:kSKMRAIDErrorDomain code:MRAIDValidationError userInfo:userInfo];
+            NSError * error = [NSError sk_errorWithCode:MRAIDValidationError
+                                           descritption:@"Operation was unsuccessful."
+                                                 reason:@"HTML cannot be nil"];
+            
             [self.delegate mraidView:self failToLoadAdThrowError:error];
         }
         return;
     }
     
-    
+    if (self.prerenderingAllowed) {
+        [self renderHTML:self.html];
+    } else {
+        if ([self.delegate respondsToSelector:@selector(mraidViewAdReady:)]) {
+            [self.delegate mraidViewAdReady:self];
+        }
+    }
+}
+
+- (void)renderHTML:(NSString *)HTML {
     self.webView = [self defaultWebViewWithFrame:CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height)];
     self.currentWebView = self.webView;
     
@@ -212,16 +204,8 @@ typedef enum {
     
     [self intersectJsLog];
     
-    html = [SKMRAIDUtil processRawHtml:html];
-    if (html) {
-        self.state = MRAIDStateLoading;
-        [self.currentWebView loadHTMLString:html baseURL:self.baseURL];
-    } else {
-        if ([self.delegate respondsToSelector:@selector(mraidView:failToLoadAdThrowError:)]) {
-            NSError * error = [NSError errorWithDomain:kSKMRAIDErrorDomain code:MRAIDValidationError userInfo:nil];
-            [self.delegate mraidView:self failToLoadAdThrowError:error];
-        }
-    }
+    self.state = MRAIDStateLoading;
+    [self.currentWebView loadHTMLString:HTML baseURL:self.baseURL];
 }
 
 - (void)cancel
@@ -244,22 +228,22 @@ typedef enum {
     self = [super initWithFrame:frame];
     if (self) {
         [self setUpTapGestureRecognizer];
-        self.isInterstitial = isInter;
-        _delegate = delegate;
-        _serviceDelegate = serviceDelegate;
-        _rootViewController = rootViewController;
-        _estimatedAdSize = CGSizeZero;
+        _isInterstitial         = isInter;
+        _delegate               = delegate;
+        _serviceDelegate        = serviceDelegate;
+        _rootViewController     = rootViewController;
+        _estimatedAdSize        = CGSizeZero;
         
-        self.customScripts = customScripts;
-        self.state = MRAIDStateDefault;
-        self.isViewable = NO;
+        _customScripts          = customScripts;
+        _state                  = MRAIDStateDefault;
+        _isViewable             = NO;
         
-        self.skOrientationProperties = [[SKMRAIDOrientationProperties alloc] init];
-        self.resizeProperties = [[SKMRAIDResizeProperties alloc] init];
+        _skOrientationProperties    = [[SKMRAIDOrientationProperties alloc] init];
+        _resizeProperties           = [[SKMRAIDResizeProperties alloc] init];
+
+        _mraidParser                = [[SKMRAIDParser alloc] init];
         
-        self.mraidParser = [[SKMRAIDParser alloc] init];
-        
-        self.mraidFeatures = @[
+        _mraidFeatures = @[
                           MRAIDSupportsSMS,
                           MRAIDSupportsTel,
                           MRAIDSupportsCalendar,
@@ -267,14 +251,17 @@ typedef enum {
                           MRAIDSupportsInlineVideo,
                           ];
         
-        if([self isValidFeatureSet:currentFeatures] && serviceDelegate){
+        if ([self isValidFeatureSet:currentFeatures] &&
+            serviceDelegate) {
             self.supportedFeatures=currentFeatures;
         }
         
-        self.previousMaxSize = CGSizeZero;
+        self.previousMaxSize    = CGSizeZero;
         self.previousScreenSize = CGSizeZero;
         
-        [self addObserver:self forKeyPath:@"self.frame" options:NSKeyValueObservingOptionOld context:NULL];
+        [self addObserver:self forKeyPath:@"self.frame"
+                  options:NSKeyValueObservingOptionOld
+                  context:NULL];
     }
     return self;
 }
@@ -282,33 +269,31 @@ typedef enum {
 #pragma mark - Private
 
 
-- (void)dealloc
-{
-    
-    [self removeObserver:self forKeyPath:@"self.frame"];
+- (void)dealloc {
+    [self removeObserver:self
+              forKeyPath:@"self.frame"];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     
-    self.webView = nil;
-    self.webViewPart2 = nil;
+    self.webView        = nil;
+    self.webViewPart2   = nil;
     self.currentWebView = nil;
     
-    self.mraidParser = nil;
-    self.modalVC = nil;
+    self.mraidParser    = nil;
+    self.modalVC        = nil;
     
-    self.skOrientationProperties = nil;
-    self.resizeProperties = nil;
+    self.skOrientationProperties    = nil;
+    self.resizeProperties           = nil;
     
-    self.mraidFeatures = nil;
-    self.supportedFeatures = nil;
+    self.mraidFeatures      = nil;
+    self.supportedFeatures  = nil;
     
-    self.closeEventRegion = nil;
-    self.resizeView = nil;
-    self.resizeCloseRegion = nil;
+    self.closeEventRegion   = nil;
+    self.resizeView         = nil;
+    self.resizeCloseRegion  = nil;
     
 }
 
-- (BOOL)isValidFeatureSet:(NSArray *)features
-{
+- (BOOL)isValidFeatureSet:(NSArray *)features {
     NSArray *kFeatures = @[
                            MRAIDSupportsSMS,
                            MRAIDSupportsTel,
@@ -326,14 +311,30 @@ typedef enum {
     return YES;
 }
 
-- (void)setIsViewable:(BOOL)isViewable
-{
+//- (BOOL)prerenderingAllowed {
+////    return ([self.delegate respondsToSelector:@selector(prerenderingAllowedInMraidView:)] && [self.delegate prerenderingAllowedInMraidView:self]) ||
+////            ![self.delegate respondsToSelector:@selector(prerenderingAllowedInMraidView:)];
+//}
+
+- (SKSpinnerView *)spinnerView {
+    if (!_spinnerView) {
+        _spinnerView = [[SKSpinnerView alloc] init];
+    }
+    return _spinnerView;
+}
+
+- (void)setIsViewable:(BOOL)isViewable {
     _isViewable=isViewable;
     
     WKUserContentController * controller = self.currentWebView.configuration.userContentController;
     if (isViewable) {
         [self removeScriptMessageHandlerInController:controller];
         [self addScriptMessageHandlerToController:controller];
+    
+        if (!self.prerenderingAllowed) {
+            [self renderHTML:self.html];
+            [self.spinnerView showOnView:self];
+        }
     } else {
         [self removeScriptMessageHandlerInController:controller];
     }
@@ -341,8 +342,7 @@ typedef enum {
     [self fireViewableChangeEvent];
 }
 
-- (void)setRootViewController:(UIViewController *)newRootViewController
-{
+- (void)setRootViewController:(UIViewController *)newRootViewController {
     if(newRootViewController!=_rootViewController) {
         _rootViewController=newRootViewController;
     }
@@ -395,8 +395,7 @@ typedef enum {
 // These methods are (indirectly) called by JavaScript code.
 // They provide the means for JavaScript code to talk to native code
 
-- (void)close
-{
+- (void)close {
     if (self.state == MRAIDStateLoading ||
         (self.state == MRAIDStateDefault && !self.isInterstitial) ||
         self.state == MRAIDStateHidden) {
@@ -450,8 +449,7 @@ typedef enum {
 }
 
 // This is a helper method which is not part of the official MRAID API.
-- (void)closeFromResize
-{
+- (void)closeFromResize {
     [self removeResizeCloseRegion];
     self.state = MRAIDStateDefault;
     [self fireStateChangeEvent];
@@ -466,8 +464,7 @@ typedef enum {
     }
 }
 
-- (void)createCalendarEvent:(NSString *)eventJSON
-{
+- (void)createCalendarEvent:(NSString *)eventJSON {
     if(!self.bonafideTapObserved && SK_SUPPRESS_BANNER_AUTO_REDIRECT){
         return;  // ignore programmatic touches (taps)
     }
@@ -492,6 +489,10 @@ typedef enum {
     if (self.state != MRAIDStateDefault && self.state != MRAIDStateResized) {
         // do nothing
         return;
+    }
+    
+    if ([self isInterstitial]) {
+        self.isViewable = YES;
     }
     
     self.modalVC = [[SKMRAIDModalViewController alloc] initWithOrientationProperties:self.skOrientationProperties];
@@ -566,7 +567,6 @@ typedef enum {
             [self fireStateChangeEvent];
         }
         [self fireSizeChangeEvent];
-        self.isViewable = YES;
     }];
 }
 
@@ -688,11 +688,11 @@ typedef enum {
 }
 
 - (void)loaded {
-    [self.doubleClickDelegate doubleClickAdReady];
+//    [self.doubleClickDelegate doubleClickAdReady];
 }
 
 - (void)noFill {
-    [self.doubleClickDelegate doubleClickNoFill];
+//    [self.doubleClickDelegate doubleClickNoFill];
 }
 
 #pragma mark - JavaScript --> native support helpers
@@ -923,8 +923,7 @@ typedef enum {
     }
 }
 
--(void)setScreenSize
-{
+-(void)setScreenSize {
     CGSize screenSize = [[UIScreen mainScreen] bounds].size;
     // screenSize is ALWAYS for portrait orientation, so we need to figure out the
     // actual interface orientation to get the correct current screenRect.
@@ -963,6 +962,22 @@ typedef enum {
     }
 }
 
+#pragma mark - SKMRAIDNetworkClientDelegate
+
+- (void)networkClient:(SKMRAIDNetworkClient *)networkClient
+          didLoadData:(NSString *)dataString {
+//    if ([self.delegate respondsToSelector:@selector(mraidView:preloadedAd:)]) {
+//        [self.delegate mraidView:self
+//                     preloadedAd:dataString];
+//    }
+}
+
+- (void)networkClient:(SKMRAIDNetworkClient *)networkClient didFailToLoadDataWithError:(NSError *)error {
+//    if ([self.delegate respondsToSelector:@selector(mraidView:didFailToPreloadAd:)]) {
+//        [self.delegate mraidView:self
+//              didFailToPreloadAd:error];
+//    }
+}
 
 #pragma mark - WKNavigationDelegate
 
@@ -983,8 +998,12 @@ typedef enum {
         [self fireSizeChangeEvent];
         [self fireReadyEvent];
         
-        if ([self.delegate respondsToSelector:@selector(mraidViewAdReady:)]) {
-            [self.delegate mraidViewAdReady:self];
+        if (self.prerenderingAllowed) {
+            if ([self.delegate respondsToSelector:@selector(mraidViewAdReady:)]) {
+                [self.delegate mraidViewAdReady:self];
+            }
+        } else {
+            [self.spinnerView hide];
         }
         
         // Start monitoring device orientation so we can reset max Size and screenSize if needed.
@@ -999,6 +1018,10 @@ typedef enum {
 }
 
 - (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error {
+    if (!self.prerenderingAllowed) {
+        [self.spinnerView hide];
+    }
+    
     if ([self.delegate respondsToSelector:@selector(mraidView:failToLoadAdThrowError:)]) {
         NSError * mraidError = [NSError errorWithDomain:kSKMRAIDErrorDomain code:MRAIDShowError userInfo:error.userInfo];
         [self.delegate mraidView:self failToLoadAdThrowError:mraidError];
@@ -1045,15 +1068,15 @@ typedef enum {
 }
 
 - (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message {
-    NSString * observer = message.name;
-    
-    if ([observer isEqualToString:kLogHandlerName]) {
-        if ([self.delegate respondsToSelector:@selector(mraidView:intersectJsLogMessage:)]) {
-            [self.delegate mraidView:self intersectJsLogMessage:message.body];
-        }
-    } else if ([observer isEqualToString:kScriptObserverName]) {
-        [self parseCommandUrl:message.body];
-    }
+//    NSString * observer = message.name;
+//    
+//    if ([observer isEqualToString:kLogHandlerName]) {
+//        if ([self.delegate respondsToSelector:@selector(mraidView:intersectJsLogMessage:)]) {
+//            [self.delegate mraidView:self intersectJsLogMessage:message.body];
+//        }
+//    } else if ([observer isEqualToString:kScriptObserverName]) {
+//        [self parseCommandUrl:message.body];
+//    }
 }
 
 #pragma mark - WKUIDelegate
@@ -1161,7 +1184,7 @@ typedef enum {
 }
 
 - (NSArray *)scriptMessageHandlersNames {
-    return @[kScriptObserverName, kLogHandlerName];
+    return @[];
 }
 
 - (void)addScriptMessageHandlerToController:(WKUserContentController *)controller {

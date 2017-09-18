@@ -10,10 +10,8 @@
 
 @implementation SKMRAIDUtil
 
-+ (NSString *)processRawHtml:(NSString *)rawHtml
-{
++ (NSString *)processRawHtml:(NSString *)rawHtml {
     NSString *processedHtml = rawHtml;
-    NSRange range;
     
     // Remove the mraid.js script tag.
     // We expect the tag to look like this:
@@ -33,11 +31,9 @@
                                                withTemplate:@""];
     
     // Add html, head, and/or body tags as needed.
-    BOOL hasHtmlTag = ([rawHtml rangeOfString:@"<html"].location != NSNotFound) || ([rawHtml rangeOfString:@"<!DOCTYPE html"].location != NSNotFound);
-    range = [rawHtml rangeOfString:@"<head"];
-    BOOL hasHeadTag = (range.location != NSNotFound);
-    range = [rawHtml rangeOfString:@"<body"];
-    BOOL hasBodyTag = (range.location != NSNotFound);
+    BOOL hasHtmlTag = ([rawHtml containsString:@"<html"]) || ([rawHtml containsString:@"<!DOCTYPE html"]);
+    BOOL hasHeadTag = [rawHtml containsString:@"<head"];
+    BOOL hasBodyTag = [rawHtml containsString:@"<body"];
     
     // basic sanity checks
     if ((!hasHtmlTag && (hasHeadTag || hasBodyTag)) ||
@@ -72,14 +68,8 @@
     }
     
     // Add meta and style tags to head tag.
-    NSString *metaTag =
-    @"<meta name='viewport' content='width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no', shrink-to-fit=YES />";
-    
-    NSString *styleTag =
-    @"<style>\n"
-    "body { margin:0; padding:0; }\n"
-    "*:not(input) { -webkit-touch-callout:none; -webkit-user-select:none; -webkit-text-size-adjust:none; }\n"
-    "</style>";
+    NSString *metaTag   = SK_VIEWPORT_META_TAG;
+    NSString *styleTag  = SK_STYLE_TAG;
     
     pattern = @"<head[^>]*>";
     error = NULL;

@@ -46,6 +46,13 @@
 		27EBFE7517F2837900FCB7DD /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27EBFE7417F2837900FCB7DD /* UIKit.framework */; };
 		9C3555831F18EE1800484D1E /* UIView+SKExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C3555821F18EE1800484D1E /* UIView+SKExtension.m */; };
 		9C7D4FBB1D9276F0003FE6E2 /* UIButton+SKExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C7D4FBA1D9276F0003FE6E2 /* UIButton+SKExtension.m */; };
+		9CC2F37E1F6FA7F900E94BBB /* NSError+SKExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 9CC2F37D1F6FA7F900E94BBB /* NSError+SKExtension.m */; };
+		9CC2F3821F6FA96100E94BBB /* SKMRAIDNetworkClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 9CC2F3811F6FA96100E94BBB /* SKMRAIDNetworkClient.m */; };
+		9CC2F3871F6FBA3C00E94BBB /* SKMRAIDWebView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9CC2F3861F6FBA3C00E94BBB /* SKMRAIDWebView.m */; };
+		9CC2F38A1F6FC0D900E94BBB /* SKSpinnerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9CC2F3891F6FC0D900E94BBB /* SKSpinnerView.m */; };
+		9CC2F38F1F6FE72500E94BBB /* SKInstanceProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 9CC2F38E1F6FE72400E94BBB /* SKInstanceProvider.m */; };
+		9CC2F3921F6FE77C00E94BBB /* SKInstanceProvider+WebKit.m in Sources */ = {isa = PBXBuildFile; fileRef = 9CC2F3911F6FE77C00E94BBB /* SKInstanceProvider+WebKit.m */; };
+		9CC2F3981F6FF71A00E94BBB /* SKMRAIDBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 9CC2F3971F6FF71A00E94BBB /* SKMRAIDBridge.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -111,6 +118,22 @@
 		9C3555821F18EE1800484D1E /* UIView+SKExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+SKExtension.m"; sourceTree = "<group>"; };
 		9C7D4FB91D9276F0003FE6E2 /* UIButton+SKExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIButton+SKExtension.h"; sourceTree = "<group>"; };
 		9C7D4FBA1D9276F0003FE6E2 /* UIButton+SKExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIButton+SKExtension.m"; sourceTree = "<group>"; };
+		9CC2F37C1F6FA7F900E94BBB /* NSError+SKExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSError+SKExtension.h"; sourceTree = "<group>"; };
+		9CC2F37D1F6FA7F900E94BBB /* NSError+SKExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSError+SKExtension.m"; sourceTree = "<group>"; };
+		9CC2F3801F6FA96100E94BBB /* SKMRAIDNetworkClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SKMRAIDNetworkClient.h; sourceTree = "<group>"; };
+		9CC2F3811F6FA96100E94BBB /* SKMRAIDNetworkClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SKMRAIDNetworkClient.m; sourceTree = "<group>"; };
+		9CC2F3851F6FBA3C00E94BBB /* SKMRAIDWebView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SKMRAIDWebView.h; sourceTree = "<group>"; };
+		9CC2F3861F6FBA3C00E94BBB /* SKMRAIDWebView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SKMRAIDWebView.m; sourceTree = "<group>"; };
+		9CC2F3881F6FC0D900E94BBB /* SKSpinnerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SKSpinnerView.h; sourceTree = "<group>"; };
+		9CC2F3891F6FC0D900E94BBB /* SKSpinnerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SKSpinnerView.m; sourceTree = "<group>"; };
+		9CC2F38B1F6FE54700E94BBB /* SKMRAIDWebViewProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SKMRAIDWebViewProtocol.h; sourceTree = "<group>"; };
+		9CC2F38D1F6FE72400E94BBB /* SKInstanceProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SKInstanceProvider.h; sourceTree = "<group>"; };
+		9CC2F38E1F6FE72400E94BBB /* SKInstanceProvider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SKInstanceProvider.m; sourceTree = "<group>"; };
+		9CC2F3901F6FE77C00E94BBB /* SKInstanceProvider+WebKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SKInstanceProvider+WebKit.h"; sourceTree = "<group>"; };
+		9CC2F3911F6FE77C00E94BBB /* SKInstanceProvider+WebKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "SKInstanceProvider+WebKit.m"; sourceTree = "<group>"; };
+		9CC2F3931F6FEDFB00E94BBB /* SKMessageHandlerProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SKMessageHandlerProtocol.h; sourceTree = "<group>"; };
+		9CC2F3961F6FF71A00E94BBB /* SKMRAIDBridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SKMRAIDBridge.h; sourceTree = "<group>"; };
+		9CC2F3971F6FF71A00E94BBB /* SKMRAIDBridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SKMRAIDBridge.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,22 +168,20 @@
 				2738BDD519815D9100A968BF /* mraidjs.h */,
 				2738BDD619815D9100A968BF /* MRAIDSettings.h */,
 				2738BDD719815D9100A968BF /* MRAIDSettings.m */,
-				2738BDD819815D9100A968BF /* properties */,
+				9CC2F38C1F6FE70900E94BBB /* Factory */,
+				2738BDD819815D9100A968BF /* Properties */,
+				9CC2F3781F6FA7A600E94BBB /* Extensions */,
+				9CC2F37F1F6FA90F00E94BBB /* Utilities */,
+				9CC2F3841F6FBA1F00E94BBB /* WebView */,
+				9CC2F3881F6FC0D900E94BBB /* SKSpinnerView.h */,
+				9CC2F3891F6FC0D900E94BBB /* SKSpinnerView.m */,
 				2738BDDD19815D9100A968BF /* SKMRAIDInterstitial.h */,
 				2738BDDE19815D9100A968BF /* SKMRAIDInterstitial.m */,
 				2738BDDF19815D9100A968BF /* SKMRAIDModalViewController.h */,
 				2738BDE019815D9100A968BF /* SKMRAIDModalViewController.m */,
-				2738BDE119815D9100A968BF /* SKMRAIDParser.h */,
-				2738BDE219815D9100A968BF /* SKMRAIDParser.m */,
 				2738BDE319815D9100A968BF /* SKMRAIDServiceDelegate.h */,
-				2738BDE419815D9100A968BF /* SKMRAIDUtil.h */,
-				2738BDE519815D9100A968BF /* SKMRAIDUtil.m */,
 				2738BDE619815D9100A968BF /* SKMRAIDView.h */,
 				2738BDE719815D9100A968BF /* SKMRAIDView.m */,
-				9C7D4FB91D9276F0003FE6E2 /* UIButton+SKExtension.h */,
-				9C7D4FBA1D9276F0003FE6E2 /* UIButton+SKExtension.m */,
-				9C3555811F18EE1800484D1E /* UIView+SKExtension.h */,
-				9C3555821F18EE1800484D1E /* UIView+SKExtension.m */,
 			);
 			path = MRAID;
 			sourceTree = "<group>";
@@ -195,7 +216,7 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		2738BDD819815D9100A968BF /* properties */ = {
+		2738BDD819815D9100A968BF /* Properties */ = {
 			isa = PBXGroup;
 			children = (
 				2738BDD919815D9100A968BF /* SKMRAIDOrientationProperties.h */,
@@ -203,6 +224,7 @@
 				2738BDDB19815D9100A968BF /* SKMRAIDResizeProperties.h */,
 				2738BDDC19815D9100A968BF /* SKMRAIDResizeProperties.m */,
 			);
+			name = Properties;
 			path = properties;
 			sourceTree = "<group>";
 		};
@@ -222,6 +244,56 @@
 				27BBC16F1833E99900074066 /* MRAID Tests-Prefix.pch */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		9CC2F3781F6FA7A600E94BBB /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				9CC2F37C1F6FA7F900E94BBB /* NSError+SKExtension.h */,
+				9CC2F37D1F6FA7F900E94BBB /* NSError+SKExtension.m */,
+				9C7D4FB91D9276F0003FE6E2 /* UIButton+SKExtension.h */,
+				9C7D4FBA1D9276F0003FE6E2 /* UIButton+SKExtension.m */,
+				9C3555811F18EE1800484D1E /* UIView+SKExtension.h */,
+				9C3555821F18EE1800484D1E /* UIView+SKExtension.m */,
+			);
+			name = Extensions;
+			sourceTree = "<group>";
+		};
+		9CC2F37F1F6FA90F00E94BBB /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				2738BDE119815D9100A968BF /* SKMRAIDParser.h */,
+				2738BDE219815D9100A968BF /* SKMRAIDParser.m */,
+				9CC2F3801F6FA96100E94BBB /* SKMRAIDNetworkClient.h */,
+				9CC2F3811F6FA96100E94BBB /* SKMRAIDNetworkClient.m */,
+				2738BDE419815D9100A968BF /* SKMRAIDUtil.h */,
+				2738BDE519815D9100A968BF /* SKMRAIDUtil.m */,
+			);
+			name = Utilities;
+			sourceTree = "<group>";
+		};
+		9CC2F3841F6FBA1F00E94BBB /* WebView */ = {
+			isa = PBXGroup;
+			children = (
+				9CC2F38B1F6FE54700E94BBB /* SKMRAIDWebViewProtocol.h */,
+				9CC2F3931F6FEDFB00E94BBB /* SKMessageHandlerProtocol.h */,
+				9CC2F3961F6FF71A00E94BBB /* SKMRAIDBridge.h */,
+				9CC2F3971F6FF71A00E94BBB /* SKMRAIDBridge.m */,
+				9CC2F3851F6FBA3C00E94BBB /* SKMRAIDWebView.h */,
+				9CC2F3861F6FBA3C00E94BBB /* SKMRAIDWebView.m */,
+			);
+			name = WebView;
+			sourceTree = "<group>";
+		};
+		9CC2F38C1F6FE70900E94BBB /* Factory */ = {
+			isa = PBXGroup;
+			children = (
+				9CC2F38D1F6FE72400E94BBB /* SKInstanceProvider.h */,
+				9CC2F38E1F6FE72400E94BBB /* SKInstanceProvider.m */,
+				9CC2F3901F6FE77C00E94BBB /* SKInstanceProvider+WebKit.h */,
+				9CC2F3911F6FE77C00E94BBB /* SKInstanceProvider+WebKit.m */,
+			);
+			name = Factory;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -321,12 +393,19 @@
 				9C7D4FBB1D9276F0003FE6E2 /* UIButton+SKExtension.m in Sources */,
 				2738BDF719815D9100A968BF /* SKMRAIDUtil.m in Sources */,
 				2738BDED19815D9100A968BF /* SKMRAIDOrientationProperties.m in Sources */,
+				9CC2F38A1F6FC0D900E94BBB /* SKSpinnerView.m in Sources */,
+				9CC2F3921F6FE77C00E94BBB /* SKInstanceProvider+WebKit.m in Sources */,
 				2738BDF519815D9100A968BF /* SKMRAIDParser.m in Sources */,
+				9CC2F3821F6FA96100E94BBB /* SKMRAIDNetworkClient.m in Sources */,
 				2738BDEB19815D9100A968BF /* MRAIDSettings.m in Sources */,
+				9CC2F3871F6FBA3C00E94BBB /* SKMRAIDWebView.m in Sources */,
 				9C3555831F18EE1800484D1E /* UIView+SKExtension.m in Sources */,
+				9CC2F3981F6FF71A00E94BBB /* SKMRAIDBridge.m in Sources */,
 				2738BDEF19815D9100A968BF /* SKMRAIDResizeProperties.m in Sources */,
 				2738BDF919815D9100A968BF /* SKMRAIDView.m in Sources */,
 				2738BDF119815D9100A968BF /* SKMRAIDInterstitial.m in Sources */,
+				9CC2F38F1F6FE72500E94BBB /* SKInstanceProvider.m in Sources */,
+				9CC2F37E1F6FA7F900E94BBB /* NSError+SKExtension.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

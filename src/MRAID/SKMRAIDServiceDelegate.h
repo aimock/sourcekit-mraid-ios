@@ -26,10 +26,3 @@ static NSString* MRAIDSupportsInlineVideo = @"inlineVideo";
 - (void)mraidServiceStorePictureWithUrlString:(NSString *)urlString;
 
 @end
-
-@protocol SKMRAIDDoubleClickDelegate <NSObject>
-
-- (void)doubleClickAdReady;
-- (void)doubleClickNoFill;
-
-@end

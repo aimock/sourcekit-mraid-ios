@@ -11,5 +11,6 @@
 @interface UIView (SKExtension)
 
 - (void)sk_makeEdgesEqualToView:(UIView *)view;
+- (void)sk_makeCenterEqualToView:(UIView *)view;
 
 @end

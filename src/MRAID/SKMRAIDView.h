@@ -8,15 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-FOUNDATION_EXPORT NSString * const kSKMRAIDErrorDomain;
-
-typedef enum {
-    MRAIDPreloadNoFillError,
-    MRAIDPreloadNetworkError,
-    MRAIDShowError,
-    MRAIDValidationError,
-    MRAIDSuspiciousCreativeError
-} MRAIDError;
 
 @class SKMRAIDView;
 @protocol SKMRAIDServiceDelegate;
@@ -26,10 +17,6 @@ typedef enum {
 @protocol SKMRAIDViewDelegate <NSObject>
 
 @optional
-// These callbacks are for basic banner ad functionality.
-- (void)mraidView:(SKMRAIDView *)mraidView preloadedAd:(NSString *)preloadedAd;
-
-- (void)mraidView:(SKMRAIDView *)mraidView didFailToPreloadAd:(NSError *)preloadError;
 
 - (void)mraidViewAdReady:(SKMRAIDView *)mraidView;
 
@@ -51,15 +38,15 @@ typedef enum {
 @end
 
 
-
 @interface SKMRAIDView : UIView
 
 @property (nonatomic, weak) id<SKMRAIDViewDelegate> delegate;
-@property (nonatomic, weak) id<SKMRAIDDoubleClickDelegate> doubleClickDelegate;
 @property (nonatomic, weak) id<SKMRAIDServiceDelegate> serviceDelegate;
+
 @property (nonatomic, weak, setter = setRootViewController:) UIViewController *rootViewController;
 @property (nonatomic, assign) BOOL isViewable;
 @property (nonatomic, strong) NSURL *baseURL;
+
 //@property (nonatomic, assign, getter = isViewable, setter = setIsViewable:) BOOL isViewable;
 
 // IMPORTANT: This is the only valid initializer for an MRAIDView; -init and -initWithFrame: will throw exceptions
@@ -89,6 +76,7 @@ typedef enum {
 - (void)injectJavaScript:(NSString *)js;
 
 @end
+
 
 @interface SKMRAIDView (Private)
 

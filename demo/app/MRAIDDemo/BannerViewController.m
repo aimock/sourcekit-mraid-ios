@@ -107,6 +107,10 @@
     mraidView.isViewable = YES;
 }
 
+- (BOOL)prerenderingAllowedInMraidView:(SKMRAIDView *)mraidView {
+    return NO;
+}
+
 - (void)mraidView:(SKMRAIDView *)mraidView intersectJsLogMessage:(NSString *)logMessage {
     NSLog(@"[JS Message Log]: %@", logMessage);
 }

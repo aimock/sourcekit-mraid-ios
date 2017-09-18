@@ -118,6 +118,10 @@
     self.displayInterButton.enabled = NO;
 }
 
+- (BOOL)prerenderingAllowedInInterstitial:(SKMRAIDInterstitial *)mraidInterstitial {
+    return NO;
+}
+
 #pragma mark - SKMRAIDDoubleClickDelegate
 
 - (void)doubleClickAdReady {

@@ -46,4 +46,24 @@
     [view addConstraints:@[left, right, top, bottom]];
 }
 
+- (void)sk_makeCenterEqualToView:(UIView *)view {
+    self.translatesAutoresizingMaskIntoConstraints = NO;
+    NSLayoutConstraint * middleX = [NSLayoutConstraint constraintWithItem:self
+                                                             attribute:NSLayoutAttributeCenterX
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:view
+                                                             attribute:NSLayoutAttributeCenterX
+                                                            multiplier:1.0
+                                                              constant:0.0];
+    
+    NSLayoutConstraint * middleY = [NSLayoutConstraint constraintWithItem:self
+                                                              attribute:NSLayoutAttributeCenterY
+                                                              relatedBy:NSLayoutRelationEqual
+                                                                 toItem:view
+                                                              attribute:NSLayoutAttributeCenterY
+                                                             multiplier:1.0
+                                                               constant:0.0];
+    [view addConstraints:@[middleX, middleY]];
+}
+
 @end
